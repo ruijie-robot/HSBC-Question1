@@ -1,0 +1,8 @@
+group_id,id,fee_rule,service,,,
+0,0,"Up to 30 pieces per customer per day, waived;",Bulk Cheque Deposit,,,
+0,1,"Over 30 pieces per customer per day, HK$1 per additional cheque.",Bulk Cheque Deposit,,,
+1,0,"For HKD / RMB Notes, up to 200 pieces of notes  per customer per day, waived; ",Bulk Cash Deposit,,,
+1,1,"For HKD / RMB Notes, over 200 pieces of notes per customer per day, 0.25% on deposit amount (min. HK$50);",Bulk Cash Deposit,,,
+1,2,"For foreign Currency notes, Waived. ",Bulk Cash Deposit,,,
+2,0,"Up to 500 coins per customer per day, waived; ",Bulk Coins Deposit,,,
+2,1,"Over 500 coins per customer per day, 2% on deposit amount (min. HK$50)",Bulk Coins Deposit,,,
