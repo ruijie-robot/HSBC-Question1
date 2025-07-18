@@ -9,15 +9,17 @@ pn.extension()
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
 
-openai.api_key  = os.environ['OPENAI_API_KEY']
+# openai.api_key  = os.environ['OPENAI_API_KEY']
+openai.api_key = os.environ['DASHSCOPE_API_KEY']
 
 
 import datetime
 current_date = datetime.datetime.now().date()
-if current_date < datetime.date(2023, 9, 2):
-    llm_name = "gpt-3.5-turbo-0301"
-else:
-    llm_name = "gpt-3.5-turbo"
+# if current_date < datetime.date(2023, 9, 2):
+#     llm_name = "gpt-3.5-turbo-0301"
+# else:
+#     llm_name = "gpt-3.5-turbo"
+llm_name = "qwen-plus"
 print(llm_name)
 
 
