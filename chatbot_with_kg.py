@@ -96,13 +96,19 @@ cypherChain = GraphCypherQAChain.from_llm(
     allow_dangerous_requests=True,  # 确认了解安全风险
 )
 
-def prettyCypherChain(question: str) -> str:
-    # GraphCypherQAChain期望的输入键是'query'
-    response = cypherChain.run({"query": question})
-    formatted_response = textwrap.fill(response, 60)
-    print(formatted_response)
-    return formatted_response
 
-question = "What are charges of Bulk Cheque Deposit?"
+# question = "What are charges of Bulk Cheque Deposit?"
+# response = cypherChain.invoke({"query": question})
+# print(response["result"])
+
+
+question = "How can I waive charges of Bulk Cheque Deposit?"
 response = cypherChain.invoke({"query": question})
-prettyCypherChain(question)
+print(response["result"])
+print("stop")
+
+
+# question = "How can I waive charges of Bulk Cash Deposit?"
+# response = cypherChain.invoke({"query": question})
+# print(response["result"])
+# print("stop")
