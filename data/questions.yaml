@@ -1,0 +1,10 @@
+- id: 1
+  question: "What are charges of Bulk Cheque Deposit?"
+- id: 2
+  question: "How can I waive charges of Bulk Cheque Deposit?"
+- id: 3
+  question: "How can I waive charges of Bulk Cash Deposit?"
+- id: 4
+  question: "I am 50 years old, can I get any waiver on my charges?"
+- id: 5
+  question: "Can I get lower charges if I change to another card?" 
