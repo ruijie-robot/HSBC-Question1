@@ -1,28 +1,14 @@
-import os
 import sys
-import warnings
 
 # Langchain
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
-from langchain_community.llms import Tongyi
 from langchain.chains import GraphCypherQAChain
 from langchain.prompts.prompt import PromptTemplate
 from dotenv import load_dotenv, find_dotenv
 
+from llm import get_qwen_llm
+from kg import get_kg
 
 sys.path.append('../..')
-
-
-_ = load_dotenv(find_dotenv()) 
-load_dotenv('.env', override=True)
-NEO4J_URI = os.getenv('NEO4J_URI')
-NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
-NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
-NEO4J_DATABASE = os.getenv('NEO4J_DATABASE') or 'neo4j'
-api_key = os.environ['DASHSCOPE_API_KEY']
-# Warning control
-warnings.filterwarnings("ignore")
 
 def create_kg_chain():
     CYPHER_GENERATION_TEMPLATE = """Task:Generate Cypher statement to 
@@ -47,17 +33,8 @@ def create_kg_chain():
     The question is:
     {question}"""
 
-    qwen_llm = Tongyi(
-    model_name="qwen-plus",
-    dashscope_api_key=api_key
-    )
-
-    kg = Neo4jGraph(
-    url=NEO4J_URI, 
-    username=NEO4J_USERNAME, 
-    password=NEO4J_PASSWORD, 
-    database=NEO4J_DATABASE
-    )
+    qwen_llm = get_qwen_llm()
+    kg = get_kg()
 
     CYPHER_GENERATION_PROMPT = PromptTemplate(
         input_variables=["schema", "question"], 
@@ -74,13 +51,21 @@ def create_kg_chain():
 
     return cypherChain
 
+def get_response(cypherChain, question):
+    response = cypherChain.invoke({"query": question})
+    return response["result"]
+
 def test_chatbot_with_kg(cypherChain):
     question1 = "What are charges of Bulk Cheque Deposit?"
     question2 = "How can I waive charges of Bulk Cheque Deposit?"
     question3 = "How can I waive charges of Bulk Cash Deposit?"
-    response = cypherChain.invoke({"query": question1})
-    print(response["result"])
 
+    response1 = get_response(cypherChain, question1)
+    response2 = get_response(cypherChain, question2)
+    response3 = get_response(cypherChain, question3)
+    print(response1)
+    print(response2)
+    print(response3)
 
 def main():
     cypherChain = create_kg_chain()
