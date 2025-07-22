@@ -47,3 +47,13 @@
 - id: 14
   question: "How do I request exemption from fees as a person with a disability?"
   type: process
+
+- id: 15
+  question: "How can I waive charges of Bulk Cash Deposit?"
+  type: test
+- id: 16
+  question: "How can I waive charges of Paper Statement?"
+  type: test
+- id: 17
+  question: "Which card is better for me?"
+  type: test
