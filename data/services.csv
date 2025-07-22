@@ -1,8 +1,15 @@
-id,service
-0,Bulk Cheque Deposit
-1,Bulk Cash Deposit 
-2,Bulk Coins Deposit
-3,Coin Changing Charges
-4,Replacement of Card
-5,Paper Statement
-6,Request for Banker’s report/document copies
+id,name,type
+0,Bulk Cheque Deposit,Bulk Cheque Deposit
+1,Bulk Cash Deposit ,Bulk Cash Deposit
+2,Bulk Coins Deposit,Bulk Coins Deposit
+3,Coin Changing Charges,Coin Changing Charges 
+4,Replacement of Card,Replacement of Card
+5,Paper Statement,Paper Statement
+6,Request for Account History Record of Savings or Time Deposit Accounts,Request for Banker’s report/document copies
+7,"Request for Photocopy of statement (per cycle), or cheque (per copy), or voucher (per copy), or transaction advice (per copy),",Request for Banker’s report/document copies
+8,Issuance of Overdraft Interest Statement,Request for Banker’s report/document copies
+9,Request for Banker’s Endorsement on Customer’s Signature,Request for Banker’s report/document copies
+10,Personal data access request,Request for Banker’s report/document copies
+11,Request for Reference Letter,Request for Banker’s report/document copies
+12,Request for Certificate of Account Balance,Request for Banker’s report/document copies
+13,Request for Certificate of Deposit Interest Earned,Request for Banker’s report/document copies

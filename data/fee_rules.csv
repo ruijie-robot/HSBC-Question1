@@ -1,8 +1,20 @@
-group_id,id,fee_rule,service,,,
-0,0,"Up to 30 pieces per customer per day, waived;",Bulk Cheque Deposit,,,
-0,1,"Over 30 pieces per customer per day, HK$1 per additional cheque.",Bulk Cheque Deposit,,,
-1,0,"For HKD / RMB Notes, up to 200 pieces of notes  per customer per day, waived; ",Bulk Cash Deposit,,,
-1,1,"For HKD / RMB Notes, over 200 pieces of notes per customer per day, 0.25% on deposit amount (min. HK$50);",Bulk Cash Deposit,,,
-1,2,"For foreign Currency notes, Waived. ",Bulk Cash Deposit,,,
-2,0,"Up to 500 coins per customer per day, waived; ",Bulk Coins Deposit,,,
-2,1,"Over 500 coins per customer per day, 2% on deposit amount (min. HK$50)",Bulk Coins Deposit,,,
+service_id,id,description,service,service_type
+0,0,"Up to 30 pieces per customer per day, waived;",Bulk Cheque Deposit,Bulk Cheque Deposit
+0,1,"Over 30 pieces per customer per day, HK$1 per additional cheque.",Bulk Cheque Deposit,Bulk Cheque Deposit
+1,2,"For HKD / RMB Notes, up to 200 pieces of notes  per customer per day, waived;",Bulk Cash Deposit,Bulk Cash Deposit
+1,3,"For HKD / RMB Notes, over 200 pieces of notes per customer per day, 0.25% on deposit amount (min. HK$50);",Bulk Cash Deposit,Bulk Cash Deposit
+1,4,"For foreign Currency notes, Waived. ",Bulk Cash Deposit,Bulk Cash Deposit
+2,5,"Up to 500 coins per customer per day, waived;",Bulk Coins Deposit,Bulk Coins Deposit
+2,6,"Over 500 coins per customer per day, 2% on deposit amount (min. HK$50)",Bulk Coins Deposit,Bulk Coins Deposit
+3,7,HK$2 per sachet,Coin Changing Charges,Coin Changing Charges 
+4,8,HK$50 per card,Replacement of Card,Replacement of Card
+5,9,HK$60 per account (For every 12 months period from July to June of the following year),Paper Statement,Paper Statement
+6,10,"For 1 Year, HK$250 per account; For For 2 Years, HK$750 per account; For 3 Years, HK$1,000 per account; For more than 3 years, HK$1,000 per year thereafter.",Request for Account History Record of Savings or Time Deposit Accounts,Request for Banker’s report/document copies
+7,11,"HK$50 per cycle or per copy (No service charge for applying a copy of the consolidation statement
+listing the unposted items of passbook account.)","Request for Photocopy of statement (per cycle), or cheque (per copy), or voucher (per copy), or transaction advice (per copy),",Request for Banker’s report/document copies
+8,12,HK$300 per copy per cycle,Issuance of Overdraft Interest Statement,Request for Banker’s report/document copies
+9,13,HK$150 per item,Request for Banker’s Endorsement on Customer’s Signature,Request for Banker’s report/document copies
+10,14,Circumstantial (maximum HK$500 per request),Personal data access request,Request for Banker’s report/document copies
+11,15,Waived,Request for Reference Letter,Request for Banker’s report/document copies
+12,16,Waived,Request for Certificate of Account Balance,Request for Banker’s report/document copies
+13,17,Waived,Request for Certificate of Deposit Interest Earned,Request for Banker’s report/document copies
