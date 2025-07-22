@@ -17,6 +17,12 @@ _ = load_dotenv(find_dotenv())
 persist_directory = 'docs/chroma/'
 
 
+def get_vectordb():
+    embedding = QwenEmbeddings()
+    vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding)
+    print(vectordb._collection.count())
+    return vectordb
+
 def test_embedding(embedding):
     """
     测试embedding功能，比较不同句子之间的相似度
