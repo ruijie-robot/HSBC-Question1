@@ -1,10 +1,49 @@
+# Direct fee queries (e.g., "What are the charges for X service?")
 - id: 1
-  question: "What are charges of Bulk Cheque Deposit?"
+  question: "What are the charges for bulk cheque deposits over 30 pieces per day?"
+  type: rate_query
 - id: 2
-  question: "How can I waive charges of Bulk Cheque Deposit?"
+  question: "What is the fee for depositing over 200 pieces of foreign currency notes?"
+  type: rate_query
 - id: 3
-  question: "How can I waive charges of Bulk Cash Deposit?"
+  question: "How much does it cost to replace a Hang Seng Card or Integrated Account Card?"
+  type: rate_query
 - id: 4
-  question: "I am 50 years old, can I get any waiver on my charges?"
+  question: "What is the charge for requesting a 2-year account history record?"
+  type: rate_query
 - id: 5
-  question: "Can I get lower charges if I change to another card?" 
+  question: "What is the fee for issuing a cashier's order?"
+  type: rate_query
+
+# Comparison of account/service benefits (e.g., "Which is better, Y or Z?")
+- id: 6
+  question: "How do bulk cheque deposit fees differ for Senior Citizen Card holders vs. regular accounts?"
+  type: comparison
+- id: 7
+  question: "What are the cost differences between bulk deposits of HKD/RMB notes and foreign currency notes?"
+  type: comparison
+- id: 8
+  question: "Are paper statement fees different for customers under 18 vs. those aged 65+?"
+  type: comparison
+
+# Eligibility verification for privileges (e.g., "Do I qualify for fee waivers?")
+- id: 9
+  question: "Are fee waivers available for Senior Citizen Card holders or customers aged 65+?"
+  type: eligibility
+- id: 10
+  question: "What documents are needed to prove eligibility for fee exemptions as a CSSA recipient?"
+  type: eligibility
+- id: 11
+  question: "Under what conditions can the paper statement service annual fee be waived?"
+  type: eligibility
+
+# Process-related inquiries (e.g., "How do I apply for X service?")
+- id: 12
+  question: "How can a senior citizen apply for a paper statement fee waiver?"
+  type: process
+- id: 13
+  question: "What is the procedure to set up a direct debit authorization to avoid fees?"
+  type: process
+- id: 14
+  question: "How do I request exemption from fees as a person with a disability?"
+  type: process
