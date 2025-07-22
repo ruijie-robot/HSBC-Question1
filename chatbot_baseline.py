@@ -1,11 +1,11 @@
 import sys
-import yaml
 
 from llm import get_qwen_llm
 from langchain.chains import RetrievalQA
 from vectordb import get_vectordb
 ### Prompt
 from langchain.prompts import PromptTemplate
+from questions import get_question_library
 
 sys.path.append('../..')
 
@@ -13,13 +13,6 @@ def test_similarity_search(vectordb):
     question = "What are major topics for this class?"
     docs = vectordb.similarity_search(question,k=3)
     len(docs)
-
-def get_question_library():
-    with open('data/questions.yaml', 'r') as f:
-        questions_data = yaml.safe_load(f)
-
-    questions = [q['question'] for q in questions_data]
-    return questions
 
 def test_on_refine_chain():
     qwen_llm = get_qwen_llm()
@@ -66,7 +59,7 @@ def main():
     qwen_llm = get_qwen_llm()
     vectordb = get_vectordb()
 
-    questions = get_question_library()
+    questions = get_question_library(type="test")
 
     #### use mapreduce chain
     qa_chain = RetrievalQA.from_chain_type(
@@ -76,7 +69,7 @@ def main():
         return_source_documents=True
     )
 
-    result = qa_chain({"query": questions[4]})
+    result = qa_chain({"query": questions[1]})
 
     print(result["result"])
 

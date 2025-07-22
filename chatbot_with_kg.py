@@ -7,6 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from llm import get_qwen_llm
 from kg import get_kg
+from questions import get_question_library
 
 sys.path.append('../..')
 
@@ -30,6 +31,13 @@ def create_kg_chain():
     MATCH (service:SERVICE {{name: "Bulk Cheque Deposit"}})-->(fee_rule:FEE_RULE)
         OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
     RETURN service.name, fee_rule.description, footnote.note
+
+    # How can I waive charges of Bulk Cash Deposit?
+    MATCH (service:SERVICE {{name: "Bulk Cash Deposit"}})-->(fee_rule:FEE_RULE)
+        OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+    RETURN service.name, fee_rule.description, footnote.note
+
+
     The question is:
     {question}"""
 
@@ -52,25 +60,23 @@ def create_kg_chain():
     return cypherChain
 
 def get_response(cypherChain, question):
-    response = cypherChain.invoke({"query": question})
+    try:
+        response = cypherChain.invoke({"query": question})
+    except Exception as e:
+        print(f"Error: {e}")
+        return "I donnot know."
     return response["result"]
 
 def test_chatbot_with_kg(cypherChain):
-    question1 = "What are charges of Bulk Cheque Deposit?"
-    question2 = "How can I waive charges of Bulk Cheque Deposit?"
-    question3 = "How can I waive charges of Bulk Cash Deposit?"
-
-    response1 = get_response(cypherChain, question1)
-    response2 = get_response(cypherChain, question2)
-    response3 = get_response(cypherChain, question3)
-    print(response1)
-    print(response2)
-    print(response3)
+    questions = get_question_library()
+    for question in questions:
+        response = get_response(cypherChain, question)
+        print(f"question: {question}\nresponse: {response}")
 
 def main():
     cypherChain = create_kg_chain()
-
     test_chatbot_with_kg(cypherChain)
+    print("Done")
 
 if __name__ == "__main__":
     main()
