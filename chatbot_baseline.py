@@ -1,0 +1,87 @@
+import sys
+import yaml
+
+from llm import get_qwen_llm
+from langchain.chains import RetrievalQA
+from vectordb import get_vectordb
+### Prompt
+from langchain.prompts import PromptTemplate
+
+sys.path.append('../..')
+
+def test_similarity_search(vectordb):
+    question = "What are major topics for this class?"
+    docs = vectordb.similarity_search(question,k=3)
+    len(docs)
+
+def get_question_library():
+    with open('data/questions.yaml', 'r') as f:
+        questions_data = yaml.safe_load(f)
+
+    questions = [q['question'] for q in questions_data]
+    return questions
+
+def test_on_refine_chain():
+    qwen_llm = get_qwen_llm()
+    vectordb = get_vectordb()
+
+    questions = get_question_library()
+
+    # Build prompt
+    GENERATION_TEMPLATE = """Use the following pieces of context to answer the question at the end. If you don't know the answer, 
+    just say that you don't know, don't try to make up an answer. Use three sentences maximum. Keep the answer as concise as possible. 
+    {context_str}
+    Question: {question}
+    Helpful Answer:"""
+    QA_CHAIN_PROMPT = PromptTemplate.from_template(GENERATION_TEMPLATE)
+
+    REFINE_TEMPLATE = """The original question is as follows: {question}
+    We have provided an existing answer: {existing_answer}
+    We have the opportunity to refine the existing answer with some more context below.
+    {context_str}
+    Given the new context, refine the original answer. If the context isn't useful, return the original answer."""
+
+    # QA_CHAIN_REFINE_PROMPT = PromptTemplate.from_template(REFINE_TEMPLATE)
+    QA_CHAIN_REFINE_PROMPT = PromptTemplate(
+    input_variables=["question", "existing_answer", "context"],
+    template=REFINE_TEMPLATE
+    )
+
+    # Use refine chain
+    qa_chain = RetrievalQA.from_chain_type(
+        qwen_llm,
+        retriever=vectordb.as_retriever(k=3),
+        chain_type="refine",
+        return_source_documents=True,
+        chain_type_kwargs={"question_prompt": QA_CHAIN_PROMPT, 
+                            "refine_prompt": QA_CHAIN_REFINE_PROMPT}
+    )
+
+    result = qa_chain({"query": questions[4]})
+    result["result"]
+    result["source_documents"][0]
+
+
+def main():
+    qwen_llm = get_qwen_llm()
+    vectordb = get_vectordb()
+
+    questions = get_question_library()
+
+    #### use mapreduce chain
+    qa_chain = RetrievalQA.from_chain_type(
+        qwen_llm,
+        retriever=vectordb.as_retriever(k=3),
+        chain_type="map_reduce",
+        return_source_documents=True
+    )
+
+    result = qa_chain({"query": questions[4]})
+
+    print(result["result"])
+
+    result["source_documents"][0]
+
+if __name__ == "__main__":
+    main()
+
