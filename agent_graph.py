@@ -67,7 +67,7 @@ def language_node(state: AgentState) -> AgentState:
     prompt = LANGUAGE_PROMPT.format(user_input=state["user_input"])
     messages = [SystemMessage(content=prompt)]
     response = qwen_llm.invoke(messages)
-    lang = response.content.strip()
+    lang = response.strip()
     state["language"] = lang
     return state
 
@@ -78,7 +78,7 @@ def intention_node(state: AgentState) -> AgentState:
     prompt = INTENTION_PROMPT.format(user_input=state["user_input"])
     messages = [SystemMessage(content=prompt)]
     response = qwen_llm.invoke(messages)
-    intent = response.content.strip()
+    intent = response.strip()
     state["intention"] = intent
     return state
 
@@ -88,11 +88,11 @@ def generation_node(state: AgentState) -> AgentState:
     # 根据意图选择不同的LLM调用方式
     if state.get("intention") == "other":
         # 使用baseline LLM，准确率为medium
-        response = get_response_kg(qa_chain_with_kg, question=state["user_input"])
+        response = get_response_baseline(qa_chain_with_baseline, question=state["user_input"])
         state["accuracy"] = "medium"
     else:
         # 其他意图，使用知识图谱LLM，准确率为high
-        response = get_response_baseline(qa_chain_with_baseline, question=state["user_input"])
+        response = get_response_kg(qa_chain_with_kg, question=state["user_input"])
         state["accuracy"] = "high"
     state["response"] = response
     return state
@@ -129,8 +129,6 @@ builder.add_node("generation", generation_node)
 builder.add_node("validation", validate_node)
 
 builder.set_entry_point("language")
-
-
 builder.add_edge("language", "intention")
 builder.add_edge("intention", "generation")
 builder.add_edge("generation", "validation")
@@ -142,13 +140,14 @@ builder.add_edge("validation", END)
 #     {END: END, "reflect": "reflect"}
 # )
 
-graph = builder.compile(checkpointer=memory)
+# graph = builder.compile(checkpointer=memory)
+graph = builder.compile()
 
 # from IPython.display import Image
 
 # Image(graph.get_graph().draw_png())
 
 thread = {"configurable": {"thread_id": "1"}}
-for s in graph.stream({'task': "what is the difference between langchain and langsmith", "max_revisions": 2,"revision_number": 1,}, thread):
+for s in graph.stream({'user_input': "How can I waive charges of Bulk Cash Deposit?", "max_revisions": 2,"revision_number": 1,}, thread):
     print(s)
 
