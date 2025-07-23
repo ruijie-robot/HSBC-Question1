@@ -8,14 +8,15 @@ from chatbot_with_kg import call_kg_chain
 from chatbot_with_kg import get_response as get_response_kg
 from chatbot_baseline import call_chain
 from chatbot_baseline import get_response as get_response_baseline
-from validator import get_active_llm_logger
 from llm import get_qwen_llm
+from validator_toxicity import is_toxicity
+from validator_refusal import is_refusal
+# from validator_data_leakage import is_data_leakage
 
 _ = load_dotenv()
 qa_chain_with_kg = call_kg_chain()
 qa_chain_with_baseline = call_chain()
 
-active_llm_logger = get_active_llm_logger()
 
 memory = SqliteSaver.from_conn_string(":memory:")
 
@@ -27,7 +28,8 @@ class AgentState(TypedDict):
     # 最终响应
     response: Optional[str]  # 返回给用户的最终回复
     accuracy: Optional[str]  # 准确率 (low/medium/high)
-    validation: Optional[bool]  # 格式和安全检查是否通过
+    prior_validation: Optional[bool]  # 格式和安全检查是否通过
+    post_validation: Optional[bool]  # 格式和安全检查是否通过
 
 qwen_llm = get_qwen_llm()
 
@@ -83,7 +85,7 @@ def intention_node(state: AgentState) -> AgentState:
     return state
 
 
-# (6) 响应生成 Agent
+# (3) 响应生成 Agent
 def generation_node(state: AgentState) -> AgentState:
     # 根据意图选择不同的LLM调用方式
     if state.get("intention") == "other":
@@ -98,47 +100,52 @@ def generation_node(state: AgentState) -> AgentState:
     return state
 
 
-# (7) 验证 & 安全过滤 Agent
-# def validate_node(state: AgentState) -> AgentState:
-#     try:
-#         active_llm_logger.log(
-#         {"prompt": state["user_input"]}
-#         )
-#         active_llm_logger.log(
-#             {"response": state["response"]}
-#         )
-#         state["validation"] = True
-#     except LLMApplicationValidationError:
-#         state["validation"] = False
-#     return state
-def validate_node(state: AgentState) -> AgentState:
-    state["validation"] = True
+# (4) 验证 & 安全过滤 Agent
+def prior_validation_node(state: AgentState) -> AgentState:
+    toxicity_flag = is_toxicity(state["user_input"])
+    if toxicity_flag:
+        state["prior_validation"] = False
+    else:
+        state["prior_validation"] = True
+    return state
+
+def post_validation_node(state: AgentState) -> AgentState:
+    toxicity_flag = is_toxicity(state["response"])
+    refusal_flag = is_refusal(state["response"])
+    if toxicity_flag or refusal_flag:
+        state["post_validation"] = False
+        print("Sorry, I can't respond to that request.")
+    else:
+        state["post_validation"] = True
+        print(state["response"])
     return state
 
 
-# def should_continue(state):
-#     if state["validation"] == False:
-#         return END
-#     return "reflect"
-
 builder = StateGraph(AgentState)
 
+builder.add_node("prior_validation", prior_validation_node)
 builder.add_node("language", language_node)
 builder.add_node("intention", intention_node)
 builder.add_node("generation", generation_node)
-builder.add_node("validation", validate_node)
+builder.add_node("post_validation", post_validation_node)
 
-builder.set_entry_point("language")
+builder.set_entry_point("prior_validation")
 builder.add_edge("language", "intention")
 builder.add_edge("intention", "generation")
-builder.add_edge("generation", "validation")
-builder.add_edge("validation", END)
-# #TODO
-# builder.add_conditional_edges(
-#     "validation", 
-#     should_continue, 
-#     {END: END, "reflect": "reflect"}
-# )
+builder.add_edge("generation", "post_validation")
+builder.add_edge("post_validation", END)
+
+def should_continue(state):
+    if state["prior_validation"] == False:
+        print("Sorry, I can't respond to that request.")
+        return END
+    return "language"
+
+builder.add_conditional_edges(
+    "prior_validation", 
+    should_continue, 
+    {END: END, "language": "language"}
+)
 
 # graph = builder.compile(checkpointer=memory)
 graph = builder.compile()
@@ -146,8 +153,9 @@ graph = builder.compile()
 # from IPython.display import Image
 
 # Image(graph.get_graph().draw_png())
-
+question1 = "如何豁免大支票存款的手续费?"
+question2 = "I hate women."
 thread = {"configurable": {"thread_id": "1"}}
-for s in graph.stream({'user_input': "如何豁免大支票存款的手续费?", "max_revisions": 2,"revision_number": 1,}, thread):
+for s in graph.stream({'user_input': question2, "max_revisions": 2,"revision_number": 1,}, thread):
     print(s)
 
