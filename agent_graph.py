@@ -1,8 +1,6 @@
 from typing import TypedDict, Optional
 
-from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIMessage, ChatMessage
 
 from chatbot_with_kg import call_kg_chain, get_response as get_response_kg
@@ -12,12 +10,10 @@ from validator_toxicity import is_toxicity
 from validator_refusal import is_refusal
 # from validator_data_leakage import is_data_leakage
 
-_ = load_dotenv()
 qa_chain_with_kg = call_kg_chain()
 qa_chain_with_baseline = call_chain()
+qwen_llm = get_qwen_llm()
 
-
-memory = SqliteSaver.from_conn_string(":memory:")
 
 class AgentState(TypedDict):
     # 输入相关
@@ -30,7 +26,6 @@ class AgentState(TypedDict):
     prior_validation: Optional[bool]  # 格式和安全检查是否通过
     post_validation: Optional[bool]  # 格式和安全检查是否通过
 
-qwen_llm = get_qwen_llm()
 
 
 LANGUAGE_PROMPT = """You are a language detection assistant. Please identify the language of the following user input. Only output the language name, choosing from: English, Simplified Chinese, Traditional Chinese, or Other.
@@ -61,8 +56,18 @@ Please provide a clear and concise answer in the specified language."""
 
 
 
-############## NODE FUNCTIONS ##############
-# (1) 语言检测 Agent
+# (1) 对话前验证 & 安全过滤 Agent
+def prior_validation_node(state: AgentState) -> AgentState:
+    toxicity_flag = is_toxicity(state["user_input"])
+    if toxicity_flag:
+        state["prior_validation"] = False
+    else:
+        state["prior_validation"] = True
+    return state
+
+
+
+# (2) 语言检测 Agent
 def language_node(state: AgentState) -> AgentState:
     # 使用qwen_llm判断语言
     prompt = LANGUAGE_PROMPT.format(user_input=state["user_input"])
@@ -73,7 +78,7 @@ def language_node(state: AgentState) -> AgentState:
     return state
 
 
-# (2) 意图识别 Agent
+# (3) 意图识别 Agent
 def intention_node(state: AgentState) -> AgentState:
     # 使用qwen_llm来识别意图
     prompt = INTENTION_PROMPT.format(user_input=state["user_input"])
@@ -84,7 +89,7 @@ def intention_node(state: AgentState) -> AgentState:
     return state
 
 
-# (3) 响应生成 Agent
+# (4) 响应生成 Agent
 def generation_node(state: AgentState) -> AgentState:
     # 根据意图选择不同的LLM调用方式
     prompt = GENERATE_PROMPT.format(language=state["language"], user_input=state["user_input"])
@@ -101,15 +106,7 @@ def generation_node(state: AgentState) -> AgentState:
     return state
 
 
-# (4) 验证 & 安全过滤 Agent
-def prior_validation_node(state: AgentState) -> AgentState:
-    toxicity_flag = is_toxicity(state["user_input"])
-    if toxicity_flag:
-        state["prior_validation"] = False
-    else:
-        state["prior_validation"] = True
-    return state
-
+# (5) 对话后验证 & 安全过滤 Agent
 def post_validation_node(state: AgentState) -> AgentState:
     toxicity_flag = is_toxicity(state["response"])
     refusal_flag = is_refusal(state["response"])
@@ -122,41 +119,49 @@ def post_validation_node(state: AgentState) -> AgentState:
         print(state["response"])
     return state
 
+def create_agent_graph():
+    builder = StateGraph(AgentState)
 
-builder = StateGraph(AgentState)
+    builder.add_node("prior_validation", prior_validation_node)
+    builder.add_node("language", language_node)
+    builder.add_node("intention", intention_node)
+    builder.add_node("generation", generation_node)
+    builder.add_node("post_validation", post_validation_node)
 
-builder.add_node("prior_validation", prior_validation_node)
-builder.add_node("language", language_node)
-builder.add_node("intention", intention_node)
-builder.add_node("generation", generation_node)
-builder.add_node("post_validation", post_validation_node)
+    builder.set_entry_point("prior_validation")
+    builder.add_edge("language", "intention")
+    builder.add_edge("intention", "generation")
+    builder.add_edge("generation", "post_validation")
+    builder.add_edge("post_validation", END)
 
-builder.set_entry_point("prior_validation")
-builder.add_edge("language", "intention")
-builder.add_edge("intention", "generation")
-builder.add_edge("generation", "post_validation")
-builder.add_edge("post_validation", END)
+    def should_continue(state):
+        if state["prior_validation"] == False:
+            print("Sorry, I can't respond to that request.")
+            return END
+        return "language"
 
-def should_continue(state):
-    if state["prior_validation"] == False:
-        print("Sorry, I can't respond to that request.")
-        return END
-    return "language"
+    builder.add_conditional_edges(
+        "prior_validation", 
+        should_continue, 
+        {END: END, "language": "language"}
+    )
 
-builder.add_conditional_edges(
-    "prior_validation", 
-    should_continue, 
-    {END: END, "language": "language"}
-)
-
-# graph = builder.compile(checkpointer=memory)
-graph = builder.compile()
+    # graph = builder.compile(checkpointer=memory)
+    graph = builder.compile()
+    return graph
 
 
-question1 = "如何豁免大支票存款的手续费?"
-question2 = "这个银行的服务烂透了，该被炸掉！"
-question3 = "今天天气不错哦"
-thread = {"configurable": {"thread_id": "1"}}
-for s in graph.stream({'user_input': question1, "max_revisions": 2,"revision_number": 1,}, thread):
-    print(s)
+def main():
+    graph = create_agent_graph()
+    question1 = "如何豁免大支票存款的手续费?"
+    question2 = "这个银行的服务烂透了，该被炸掉！"
+    question3 = "今天天气不错哦"
+    question4 = "How can I get waived from Bulk Check Deposit fees?"
+    thread = {"configurable": {"thread_id": "1"}}
+    for s in graph.stream({'user_input': question1, "max_revisions": 4,"revision_number": 1,}, thread):
+        print(s)
+
+
+if __name__ == "__main__":
+    main()
 
