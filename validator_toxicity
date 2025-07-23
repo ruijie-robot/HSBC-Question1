@@ -1,0 +1,34 @@
+from whylogs.experimental.core.udf_schema import register_dataset_udf
+from whylogs.experimental.core.udf_schema import udf_schema
+import pandas as pd
+from langkit import sentiment
+from transformers import pipeline
+from span_marker import SpanMarkerModel
+
+
+entity_model = SpanMarkerModel.from_pretrained(
+    "tomaarsen/span-marker-bert-tiny-fewnerd-coarse-super"
+)
+
+toxigen_hatebert = pipeline("text-classification", 
+                             model="tomh/toxigen_hatebert", 
+                             tokenizer="bert-base-cased")
+
+
+def is_toxicity(text):
+    result = toxigen_hatebert([text])
+    if result[0]["label"] == "LABEL_0" and result[0]["score"] < 0.95:
+        return True
+    else:
+        return False
+
+
+
+def main():
+    # print(is_toxicity("这个银行的服务烂透了，该被炸掉！"))
+    print(is_toxicity(""))
+    print("stop")
+
+
+if __name__ == "__main__":
+    main()
