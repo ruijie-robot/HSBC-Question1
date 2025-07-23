@@ -148,6 +148,6 @@ graph = builder.compile()
 # Image(graph.get_graph().draw_png())
 
 thread = {"configurable": {"thread_id": "1"}}
-for s in graph.stream({'user_input': "How can I waive charges of Bulk Cash Deposit?", "max_revisions": 2,"revision_number": 1,}, thread):
+for s in graph.stream({'user_input': "如何豁免大支票存款的手续费?", "max_revisions": 2,"revision_number": 1,}, thread):
     print(s)
 
