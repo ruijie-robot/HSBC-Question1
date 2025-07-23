@@ -54,6 +54,26 @@ def test_on_refine_chain():
     result["result"]
     result["source_documents"][0]
 
+### 把qa_chain建立起来，方便调用
+def call_chain():
+    qwen_llm = get_qwen_llm()
+    vectordb = get_vectordb()
+
+    qa_chain = RetrievalQA.from_chain_type(
+        qwen_llm,
+        retriever=vectordb.as_retriever(k=3),
+        chain_type="map_reduce",
+        return_source_documents=True
+    )
+    return qa_chain
+
+def get_response(qa_chain, question):
+    try:
+        result = qa_chain({"query": question})
+    except Exception as e:
+        print(f"Error: {e}")
+        return "I donnot know."
+    print(result["result"])
 
 def main():
     qwen_llm = get_qwen_llm()

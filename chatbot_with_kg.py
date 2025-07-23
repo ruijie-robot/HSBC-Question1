@@ -11,7 +11,7 @@ from questions import get_question_library
 
 sys.path.append('../..')
 
-def create_kg_chain():
+def call_kg_chain():
     CYPHER_GENERATION_TEMPLATE = """Task:Generate Cypher statement to 
     query a graph database.
     Instructions:
@@ -74,7 +74,7 @@ def test_chatbot_with_kg(cypherChain):
         print(f"question: {question}\nresponse: {response}")
 
 def main():
-    cypherChain = create_kg_chain()
+    cypherChain = call_kg_chain()
     test_chatbot_with_kg(cypherChain)
     print("Done")
 
