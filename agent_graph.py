@@ -1,13 +1,12 @@
+from typing import TypedDict, Optional
+
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIMessage, ChatMessage
-from typing import TypedDict, Optional
 
-from chatbot_with_kg import call_kg_chain
-from chatbot_with_kg import get_response as get_response_kg
-from chatbot_baseline import call_chain
-from chatbot_baseline import get_response as get_response_baseline
+from chatbot_with_kg import call_kg_chain, get_response as get_response_kg
+from chatbot_baseline import call_chain, get_response as get_response_baseline
 from llm import get_qwen_llm
 from validator_toxicity import is_toxicity
 from validator_refusal import is_refusal
@@ -67,7 +66,7 @@ Please provide a clear and concise answer in the specified language."""
 def language_node(state: AgentState) -> AgentState:
     # 使用qwen_llm判断语言
     prompt = LANGUAGE_PROMPT.format(user_input=state["user_input"])
-    messages = [SystemMessage(content=prompt)]
+    messages = [HumanMessage(content=prompt)]
     response = qwen_llm.invoke(messages)
     lang = response.strip()
     state["language"] = lang
@@ -78,7 +77,7 @@ def language_node(state: AgentState) -> AgentState:
 def intention_node(state: AgentState) -> AgentState:
     # 使用qwen_llm来识别意图
     prompt = INTENTION_PROMPT.format(user_input=state["user_input"])
-    messages = [SystemMessage(content=prompt)]
+    messages = [ChatMessage(role="assistant", content=prompt)]
     response = qwen_llm.invoke(messages)
     intent = response.strip()
     state["intention"] = intent
@@ -88,13 +87,15 @@ def intention_node(state: AgentState) -> AgentState:
 # (3) 响应生成 Agent
 def generation_node(state: AgentState) -> AgentState:
     # 根据意图选择不同的LLM调用方式
+    prompt = GENERATE_PROMPT.format(language=state["language"], user_input=state["user_input"])
+    messages = ChatMessage(role="assistant", content=prompt)
     if state.get("intention") == "other":
         # 使用baseline LLM，准确率为medium
-        response = get_response_baseline(qa_chain_with_baseline, question=state["user_input"])
+        response = get_response_baseline(qa_chain_with_baseline, question=messages)
         state["accuracy"] = "medium"
     else:
         # 其他意图，使用知识图谱LLM，准确率为high
-        response = get_response_kg(qa_chain_with_kg, question=state["user_input"])
+        response = get_response_kg(qa_chain_with_kg, question=messages)
         state["accuracy"] = "high"
     state["response"] = response
     return state
@@ -114,6 +115,7 @@ def post_validation_node(state: AgentState) -> AgentState:
     refusal_flag = is_refusal(state["response"])
     if toxicity_flag or refusal_flag:
         state["post_validation"] = False
+        print(f"toxicity_flag = {toxicity_flag}, refusal_flag={refusal_flag}")
         print("Sorry, I can't respond to that request.")
     else:
         state["post_validation"] = True
@@ -150,12 +152,11 @@ builder.add_conditional_edges(
 # graph = builder.compile(checkpointer=memory)
 graph = builder.compile()
 
-# from IPython.display import Image
 
-# Image(graph.get_graph().draw_png())
 question1 = "如何豁免大支票存款的手续费?"
-question2 = "I hate women."
+question2 = "这个银行的服务烂透了，该被炸掉！"
+question3 = "今天天气不错哦"
 thread = {"configurable": {"thread_id": "1"}}
-for s in graph.stream({'user_input': question2, "max_revisions": 2,"revision_number": 1,}, thread):
+for s in graph.stream({'user_input': question1, "max_revisions": 2,"revision_number": 1,}, thread):
     print(s)
 
