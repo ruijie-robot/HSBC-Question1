@@ -72,7 +72,7 @@ def get_response(qa_chain, question):
         result = qa_chain({"query": question})
     except Exception as e:
         print(f"Error: {e}")
-        return "I donnot know."
+        return "Sorry, I donnot know."
     print(result["result"])
 
 def main():

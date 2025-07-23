@@ -64,7 +64,7 @@ def get_response(cypherChain, question):
         response = cypherChain.invoke({"query": question})
     except Exception as e:
         print(f"Error: {e}")
-        return "I donnot know."
+        return "Sorry,I donnot know."
     return response["result"]
 
 def test_chatbot_with_kg(cypherChain):
