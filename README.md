@@ -114,16 +114,38 @@ In `agent_graph.py`, the core workflow of the chatbot is defined. The process is
 3. **Comparison of the Two Methods**
 
 Example:
-> **question:** How can I get waived from Coin Changing Charges?  
-
-> **response (high-precision model):** To get waived from Coin Changing Charges, you can enjoy a privileged service charge of HK$1 per sachet if you have an Integrated Account of Prestige Private or Prestige Banking.
-
-> **response (general model):** Based on the provided information, Coin Changing Charges can be waived under the following conditions:
-> 1. If all cheques are deposited into the same account as one single transaction.
-> 2. For Customers with a Senior Citizen Card or Customers aged 65 or above.
-> 3. For Bulk Coins Deposit: If you deposit up to 500 coins per customer per day, the charge is waived.
-
-> **Correct answer:** Coin Changing Charges are HK$2 per sachet. Integrated Account of Prestige Private/Prestige Banking can enjoy a privileged service charge of HK$1 per sachet.
+<div style="border: 2px solid rgb(75, 98, 147); border-radius: 8px; padding: 18px; background:rgb(183, 189, 195); margin: 18px 0;">
+  <ul style="list-style: none; padding-left: 0;">
+    <li>
+      <span style="color:rgb(60, 58, 58); font-weight: bold;">Question:</span>
+      <br>
+      <code style="color:rgb(60,58,58);">How can I get waived from Coin Changing Charges?</code>
+    </li>
+    <li style="margin-top: 10px;">
+      <span style="color:rgb(60, 58, 58); font-weight: bold;">Response (High-Precision Model):</span>
+      <div style="background:rgb(75, 98, 147); border-radius: 5px; padding: 8px 12px; margin-top: 4px;">
+        To get waived from Coin Changing Charges, you can enjoy a privileged service charge of HK$1 per sachet if you have an Integrated Account of Prestige Private or Prestige Banking.
+      </div>
+    </li>
+    <li style="margin-top: 10px;">
+      <span style="color:rgb(60, 58, 58); font-weight: bold;">Response (General Model):</span>
+      <div style="background: rgb(75, 98, 147); border-radius: 5px; padding: 8px 12px; margin-top: 4px;">
+        Based on the provided information, Coin Changing Charges can be waived under the following conditions:
+        <ol style="margin: 6px 0 0 18px;">
+          <li>If all cheques are deposited into the same account as one single transaction.</li>
+          <li>For Customers with a Senior Citizen Card or Customers aged 65 or above.</li>
+          <li>For Bulk Coins Deposit: If you deposit up to 500 coins per customer per day, the charge is waived.</li>
+        </ol>
+      </div>
+    </li>
+    <li style="margin-top: 10px;">
+      <span style="color:rgb(60, 58, 58); font-weight: bold;">Correct Answer:</span>
+      <div style="background: rgb(75, 98, 147); border-radius: 5px; padding: 8px 12px; margin-top: 4px;">
+        Coin Changing Charges are HK$2 per sachet. Integrated Account of Prestige Private/Prestige Banking can enjoy a privileged service charge of HK$1 per sachet.
+      </div>
+    </li>
+  </ul>
+</div>
 
 As shown, the general model (i.e., standard text RAG) incorrectly responded with other fee information due to similarity-based retrieval.
 
