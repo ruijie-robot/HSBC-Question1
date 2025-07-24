@@ -20,7 +20,7 @@ The overall structure is as follows:
 In `agent_graph.py`, the core workflow of the chatbot is defined. The process is divided into the following steps, each represented by an Agent node:
 
 
-![Agent Graph Workflow](./data/agent_graph2.png)
+![Agent Graph Workflow](./pictures/agent_graph.png)
 
 
 - **(1) Pre-conversation Validation & Safety Filtering (prior_validation)**  
