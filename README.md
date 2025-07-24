@@ -19,6 +19,10 @@ The overall structure is as follows:
 ### 2.1 Code Structure
 In `agent_graph.py`, the core workflow of the chatbot is defined. The process is divided into the following steps, each represented by an Agent node:
 
+
+![Agent Graph Workflow](./data/agent_graph2.png)
+
+
 - **(1) Pre-conversation Validation & Safety Filtering (prior_validation)**  
   Checks if user input contains harmful, offensive, or inappropriate content (e.g., toxicity detection). If the check fails, service is refused.
 
@@ -79,6 +83,17 @@ In `agent_graph.py`, the core workflow of the chatbot is defined. The process is
 1. **High-Precision Model**
 
 1.1 Uses a Knowledge Graph approach, organizing document content into a network of nodes and edges. Node types include: cards, service, fee_rule, and footnote. Each node contains a text description and is connected via fee relationships from the document. (Due to the large amount of data cleaning required, the current code only processes the first page of rate queries.)
+
+- eg. From cards to service
+![Cards to Service Relationship](./pictures/card_to_service.png)
+
+- eg. From service to fee_rule
+![Service to Fee Rule Relationship](./pictures/service_to_fee_rule.png)
+
+- eg. From fee_rule to footnote
+![Fee Rule to Footnote Relationship](./pictures/fee_rule_to_footnote.png)
+
+
 
 1.2 During queries, relevant nodes are automatically retrieved and analyzed together, ensuring the query is strictly limited to the provided document scope and comprehensively covers all related information, avoiding omissions.
 
