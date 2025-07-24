@@ -143,7 +143,7 @@ Using the Test Question Set, one can calculate the accuracy% of the metrics belo
 - **Toxicity Detection**: Calls `validator_toxicity.py`
 - **Refusal Detection**: Calls `validator_refusal.py`
 - **Data Leakage Detection**: Calls `validator_data_leakage.py`
-- **Hallucination Detection**: Calls `validator_halluciation.py`
+- **Hallucination Detection**: Uses BERT score (`validator_halluciation.py`), but this method is actually not very accurate—especially for rate-related answers, which tend to be very similar. The most reliable way is still manual evaluation.
 
 ## 4. Future Improvement
 
