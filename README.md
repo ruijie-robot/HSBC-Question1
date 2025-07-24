@@ -161,3 +161,7 @@ Using the Test Question Set, one can calculate the accuracy% of the metrics belo
 3. **Scalability & Maintenance**
    - **Knowledge Graph Scalability**: The performance of the knowledge graph with large-scale data needs to be verified to ensure efficiency after expansion. I personally donnot think maintaning a huge network is a good idea, as network is far more complex than ordinary data structures, such as table, json etc. However, In our scenatios, where rates inquiry network is relatively small and precision is valued, it is suggested to use.
    - **Version Compatibility & Environment Maintenance**: LLMs and Agent tools are updated rapidly, so attention must be paid to version compatibility. After system launch, the old environment and syntax should be maintained to ensure continuous availability and maintainability.
+
+
+## 4. Others
+The test folder are just arbitrary testing files that can be ignored.
