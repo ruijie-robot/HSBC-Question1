@@ -87,12 +87,39 @@ def create_relationship_service_to_fee_rule(kg):
 
 
 def create_relationship_fee_rule_to_footnote(kg, map_df):
-    relationship_fee_rule_to_footnote_query = """
+    # relationship_fee_rule_to_footnote_query = """
+    # MATCH
+    # (service:SERVICE {id: $service_id}),
+    # (fee_rule:FEE_RULE {id: $fee_rule_id}),
+    # (footnote:FOOTNOTE {id: $footnote_id})
+    # OPTIONAL MATCH (card:CARD {id: $card_id})
+    # MERGE (fee_rule)-[r:HAS_FOOTNOTE]->(footnote)
+    # RETURN count(r)
+    # """
+
+
+    # query_with_card_id = """
+    # MATCH
+    # (card:CARD {id: $card_id}),
+    # (service:SERVICE {id: $service_id}),
+    # (fee_rule:FEE_RULE {id: $fee_rule_id}),
+    # (footnote:FOOTNOTE {id: $footnote_id})
+    # MERGE (fee_rule)-[r:HAS_FOOTNOTE]->(footnote)
+    # RETURN count(r)
+    # """
+
+    query_with_card_id = """
+    MATCH (card:CARD {id: $card_id}),
+    (footnote:FOOTNOTE {id: $footnote_id})
+    MERGE (card)-[r:HAS_FOOTNOTE]->(footnote)
+    RETURN count(r)
+    """
+
+    query_without_card_id = """
     MATCH
     (service:SERVICE {id: $service_id}),
     (fee_rule:FEE_RULE {id: $fee_rule_id}),
     (footnote:FOOTNOTE {id: $footnote_id})
-    OPTIONAL MATCH (card:CARD {id: $card_id})
     MERGE (fee_rule)-[r:HAS_FOOTNOTE]->(footnote)
     RETURN count(r)
     """
@@ -105,13 +132,17 @@ def create_relationship_fee_rule_to_footnote(kg, map_df):
     footnote_relationship_count = 0
     for i in map_df.index:
         card_id = None if pd.isna(map_df.loc[i, "card_id"]) else int(map_df.loc[i, "card_id"])
-        service_id = int(map_df.loc[i, "service_id"])
-        fee_rule_id = int(map_df.loc[i, "fee_rule_id"])
+        service_id = None if pd.isna(map_df.loc[i, "service_id"]) else int(map_df.loc[i, "service_id"])
+        fee_rule_id = None if pd.isna(map_df.loc[i, "fee_rule_id"]) else int(map_df.loc[i, "fee_rule_id"])
         note_ids_str = map_df.loc[i, "note_ids"]
         note_ids = ast.literal_eval(note_ids_str) if isinstance(note_ids_str, str) else note_ids_str
         for note_id in note_ids:
-            result = kg.query(relationship_fee_rule_to_footnote_query, 
-                    params={'card_id': card_id, 'service_id': service_id, 'fee_rule_id': fee_rule_id, 'footnote_id': note_id})
+            if card_id is not None:
+                result = kg.query(query_with_card_id, 
+                        params={'card_id': card_id, 'footnote_id': note_id})
+            else:
+                result = kg.query(query_without_card_id, 
+                        params={'service_id': service_id, 'fee_rule_id': fee_rule_id, 'footnote_id': note_id})
             footnote_relationship_count += result[0]['count(r)']
     print("create {n} relationship fee rule to footnote done".format(n=footnote_relationship_count))
 
@@ -130,12 +161,12 @@ def main():
     footnotes_list_of_dicts = footnotes_df.to_dict(orient='records')
     fee_rules_list_of_dicts = fee_rules_df.to_dict(orient='records')
 
-    create_card_node(kg, cards_list_of_dicts)
-    create_service_node(kg, services_list_of_dicts)
-    create_footnote_node(kg, footnotes_list_of_dicts)
-    create_fee_rule_node(kg, fee_rules_list_of_dicts)
-    create_relationship_card_to_service(kg)
-    create_relationship_service_to_fee_rule(kg)
+    # create_card_node(kg, cards_list_of_dicts)
+    # create_service_node(kg, services_list_of_dicts)
+    # create_footnote_node(kg, footnotes_list_of_dicts)
+    # create_fee_rule_node(kg, fee_rules_list_of_dicts)
+    # create_relationship_card_to_service(kg)
+    # create_relationship_service_to_fee_rule(kg)
     create_relationship_fee_rule_to_footnote(kg, map_df)
 
 

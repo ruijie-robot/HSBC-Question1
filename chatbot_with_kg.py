@@ -37,6 +37,12 @@ def call_kg_chain():
         OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
     RETURN service.name, fee_rule.description, footnote.note
 
+    # What is the difference between Hang Seng Card and Integrated Account Card of Prestige Private?
+    MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+    WHERE card.name IN ['Hang Seng Card', 'Integrated Account Card of Prestige Private']
+    OPTIONAL MATCH (card)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+    OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+    RETURN card.name, service.name, fee_rule.description, footnote.note
 
     The question is:
     {question}"""
@@ -75,7 +81,16 @@ def test_chatbot_with_kg(cypherChain):
 
 def main():
     cypherChain = call_kg_chain()
-    test_chatbot_with_kg(cypherChain)
+    # question = "How can I get waived from Bulk Cheque Deposit fees?"
+    # question = "How can I get waived from Coin Changing Charges?"
+    # question = "What are charges of Bulk Cheque Deposit?"
+    # question = "How much does the Bulk Cheque Deposit cost?"
+    question = "What is the difference between Hang Seng Card and Integrated Account Card of Preferred Banking?"
+    # question = "What is the difference between Integrated Account Card of Prestige Private and Integrated Account Card of Prestige Banking"
+    # question = "What is the difference between Hang Seng Card of Prestige Private and Integrated Account Card of Prestige Banking"
+    response = get_response(cypherChain, question)
+    print(f"question: {question}\nresponse: {response}")
+    # test_chatbot_with_kg(cypherChain)
     print("Done")
 
 if __name__ == "__main__":

@@ -62,13 +62,56 @@ kg = Neo4jGraph(
 #     RETURN service.name, fee_rule.description, footnote.text""")
 
 #### 会返回和service连接的所有node
-result = kg.query("""MATCH (fee_rule:FEE_RULE)-[r:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
-RETURN fee_rule.id, footnote.id""")
+# result = kg.query("""MATCH (fee_rule:FEE_RULE)-[r:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+# RETURN fee_rule.id, footnote.id""")
+
+# result = kg.query("""MATCH (service:SERVICE {name: 'Bulk Cash Deposit'})-[r:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+#     RETURN service.name, fee_rule.description""")
 
 
-# result = kg.query("""MATCH (service:SERVICE)-[r:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
-#     RETURN service.id, fee_rule.id""")
+result = kg.query("""MATCH (service:SERVICE {name: "Bulk Cash Deposit"})-->(fee_rule:FEE_RULE)
+        OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+    RETURN service.name, fee_rule.description, footnote.note""")
+
+
+##### comparison
+# result = kg.query("""MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+#     OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+#     WHERE card.name in ['Hang Seng Card', 'Integrated Account Card of Preferred Banking']
+#     RETURN card.name, service.name, fee_rule.description, footnote.note
+#     """)
+
+# result = kg.query("""
+# MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+#     OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+#     WHERE card.name in ['Hang Seng Card', 'Integrated Account Card of Prestige Private']
+#     RETURN card.name, service.name, fee_rule.description, footnote.note
+# """)
+
+# result = kg.query("""
+# MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+# WHERE card.name IN ['Integrated Account Card of Prestige Private', 'Integrated Account Card of Prestige Banking']
+# OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+# RETURN card.name, service.name, fee_rule.description, footnote.note""")
+
+# result = kg.query("""
+# MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+# WHERE card.name IN ['Integrated Account Card of Prestige Banking']
+# OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+# RETURN card.id as card_id, service.id as service_id, fee_rule.id as fee_rule_id, footnote.id as footnote_id, footnote.note as footnote""")
+
+
+result = kg.query("""
+MATCH (card:CARD)-[r:HAS_SERVICE]->(service:SERVICE)-[:HAS_FEE_RULE]->(fee_rule:FEE_RULE)
+WHERE card.name IN ['Hang Seng Card']
+OPTIONAL MATCH (fee_rule)-[:HAS_FOOTNOTE]->(footnote:FOOTNOTE)
+RETURN card.id as card_id, card.name as card_name, service.id as service_id, service.name as service_name, fee_rule.id as fee_rule_id, fee_rule.description as fee_rule_description, footnote.id as footnote_id, footnote.note as footnote_note
+""")
 
 print(result)
+print("--------------------------------")
+for item in result:
+    if item['footnote_note'] is not None and "65" in item['footnote_note']:
+        print(item)
 
 print("stop")

@@ -89,7 +89,7 @@
 
 
 ### 2.3 响应生成
-1. **高精度费率查询**
+1. **高精度 Model**
 
 1.1 采用Knowledge Graph（知识图谱）方式，将文档内容整理为由node（节点）和edge（边）组成的网络结构。节点类型包括：cards、service、fee_rule 和 footnote，每个节点都携带一段文字描述，并通过文档中的费率对应关系进行连接。（目前代码仅处理了第一页的费率查询内容）
 
@@ -101,9 +101,9 @@
 
 1.4 代码实现上，使用 `create_knowledge_graph.py` 进行建图，图数据存储在 Neo4j 云端服务器，通过 Neo4j API 及 Cypher 语法进行查询（目前为14天 trial 版）。这种网络结构的复杂度高于一般结构化数据，未来在大规模扩展时的性能表现尚待进一步调研。
 
-2. **General 文档查询**
+2. **general Model**
 
-2.1 不进行结构化整理，直接提取文档原文，经过 split、tokenize 后存储在 ChromaDB 中。
+2.1 不进行结构化整理，直接提取文档原文，经过 split、tokenize 后存储在 ChromaDB 中。（目前代码仅处理了第一页的费率查询内容）
 
 2.2 查询时，采用 map-reduce 的 retrieval 方法，综合检索结果生成最终回答。
 
@@ -112,15 +112,22 @@
 3. **两种方法的对比**
 
 例子1：
+> **question：** How can I get waived from Bulk Cheque Deposit fees?  
 
-例子2：
+> **response (高精度 model)：** To get waived from Bulk Cheque Deposit fees, you can enjoy a privileged service charge or fee waiver if you have an Integrated Account of Prestige Private or Prestige Banking. Please refer to the specific account privileges for detailed waiver conditions.
+
+> **response (general model)：** 	Based on the provided information, Coin Changing Charges can be waived under the following conditions:
+>	1. If all cheques are deposited into the same account as one single transaction.
+>	2. For Customers with a Senior Citizen Card or Customers aged 65 or above.
+>	3. For Bulk Coins Deposit: If you deposit up to 500 coins per customer per day, the charge is waived.
+
+可以看到，使用general model，也就是普通的文本RAG，用similarity错误的回复了其他费率的内容
 
 
 ## 3. 模型评估
 对于typo和简写的robustness测试
 
-## 4. 后续提升方向
-### 总结与后续提升方向
+## 4. 提升方向
 
 1. **速度优化**
    - **LLM推理**：目前采用远程API调用LLM，若能本地部署将显著提升响应速度。对于简单分类任务（如意图识别），可用BERT等轻量模型替代大型LLM（如Qwen），进一步加快推理。推理时采用streaming方式也有助于提升速度。

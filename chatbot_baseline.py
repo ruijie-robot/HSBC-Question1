@@ -73,27 +73,24 @@ def get_response(qa_chain, question):
     except Exception as e:
         print(f"Error: {e}")
         return "Sorry, I donnot know."
-    print(result["result"])
+    # print(result["result"])
+    return result["result"]
 
 def main():
-    qwen_llm = get_qwen_llm()
-    vectordb = get_vectordb()
+    # qwen_llm = get_qwen_llm()
+    # vectordb = get_vectordb()
+    qa_chain = call_chain()
 
     questions = get_question_library(type="test")
+    # question = "How can I get waived from Bulk Cheque Deposit fees?"
+    # question = "How much does the Bulk Cheque Deposit cost?"
+    # question = "What is the difference between Integrated Account Card of Prestige Private and Integrated Account Card of Prestige Banking"
+    question = "How can I get waived from Coin Changing Charges?"
+    response = get_response(qa_chain, question)
+    print(f"question: {question}\nresponse: {response}")
 
-    #### use mapreduce chain
-    qa_chain = RetrievalQA.from_chain_type(
-        qwen_llm,
-        retriever=vectordb.as_retriever(k=3),
-        chain_type="map_reduce",
-        return_source_documents=True
-    )
-
-    result = qa_chain({"query": questions[1]})
-
-    print(result["result"])
-
-    result["source_documents"][0]
+    print("Done")
+    # result["source_documents"][0]
 
 if __name__ == "__main__":
     main()
